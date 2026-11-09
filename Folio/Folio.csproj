@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Folio</AssemblyName>
+    <RootNamespace>Folio</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>folio.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Product>Folio</Product>
+    <Description>A lightweight Windows file explorer with freely sizable thumbnails</Description>
+    <!-- Fluent ThemeMode is flagged as experimental -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="System.IO" />
+    <Resource Include="folio.ico" />
+  </ItemGroup>
+
+</Project>

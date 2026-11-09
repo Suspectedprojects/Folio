@@ -1,0 +1,223 @@
+<Window x:Class="Folio.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Folio"
+        Title="Folio" Icon="folio.ico" Width="1200" Height="780" MinWidth="640" MinHeight="420"
+        PreviewKeyDown="Window_PreviewKeyDown" PreviewMouseDown="Window_PreviewMouseDown">
+
+    <Window.Resources>
+        <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+        <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style x:Key="CmdButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="1,0"/>
+        </Style>
+
+        <Style x:Key="ViewToggle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="1,0"/>
+        </Style>
+
+        <Style x:Key="Glyph" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,7,0"/>
+        </Style>
+
+        <Style x:Key="TileItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
+        </Style>
+
+        <DataTemplate x:Key="TileTemplate" DataType="{x:Type local:FileItem}">
+            <StackPanel Loaded="Tile_Loaded" Unloaded="Tile_Unloaded" Opacity="{Binding ItemOpacity}"
+                        ToolTip="{Binding ToolTipText}" ToolTipService.InitialShowDelay="900">
+                <Border Height="{Binding DataContext.ThumbSize, RelativeSource={RelativeSource AncestorType=Window}}">
+                    <Image Source="{Binding Thumbnail}" Stretch="Uniform" StretchDirection="DownOnly"
+                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Border>
+                <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                           TextAlignment="Center" Margin="0,6,0,0" MaxHeight="36"
+                           LineHeight="17" LineStackingStrategy="BlockLineHeight"/>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Navigation bar -->
+        <Grid Grid.Row="0" Margin="8,8,8,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="280"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="BackButton" Style="{StaticResource IconButton}" Content="&#xE72B;" ToolTip="Back (Alt+Left)" Click="Back_Click"/>
+                <Button x:Name="ForwardButton" Style="{StaticResource IconButton}" Content="&#xE72A;" ToolTip="Forward (Alt+Right)" Click="Forward_Click"/>
+                <Button x:Name="UpButton" Style="{StaticResource IconButton}" Content="&#xE74A;" ToolTip="Up (Alt+Up)" Click="Up_Click"/>
+                <Button Style="{StaticResource IconButton}" Content="&#xE72C;" ToolTip="Refresh (F5)" Click="Refresh_Click"/>
+            </StackPanel>
+            <TextBox x:Name="AddressBox" Grid.Column="1" Margin="6,0" VerticalContentAlignment="Center"
+                     KeyDown="AddressBox_KeyDown" GotKeyboardFocus="TextBox_SelectAllOnFocus"
+                     PreviewMouseLeftButtonDown="TextBox_PreviewMouseDown"/>
+            <Grid Grid.Column="2">
+                <TextBox x:Name="SearchBox" VerticalContentAlignment="Center" Padding="30,0,96,0"
+                         TextChanged="SearchBox_TextChanged" KeyDown="SearchBox_KeyDown"
+                         GotKeyboardFocus="TextBox_SelectAllOnFocus" PreviewMouseLeftButtonDown="TextBox_PreviewMouseDown"/>
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE721;" Margin="10,0,0,0" HorizontalAlignment="Left" IsHitTestVisible="False" Opacity="0.6"/>
+                <CheckBox x:Name="SubfolderCheck" Content="Subfolders" HorizontalAlignment="Right" Margin="0,0,6,0"
+                          VerticalAlignment="Center" FontSize="12" MinWidth="0" ToolTip="Search all subfolders (press Enter)"
+                          Checked="SubfolderCheck_Changed" Unchecked="SubfolderCheck_Changed"/>
+            </Grid>
+        </Grid>
+
+        <!-- Command bar -->
+        <DockPanel Grid.Row="1" Margin="8,0,8,6" LastChildFill="False">
+            <Button Style="{StaticResource CmdButton}" Click="NewFolder_Click" ToolTip="New folder (Ctrl+Shift+N)">
+                <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Glyph}" Text="&#xE8F4;"/><TextBlock Text="New folder"/></StackPanel>
+            </Button>
+            <Button Style="{StaticResource CmdButton}" Click="Cut_Click" ToolTip="Cut (Ctrl+X)">
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE8C6;" Margin="0"/>
+            </Button>
+            <Button Style="{StaticResource CmdButton}" Click="Copy_Click" ToolTip="Copy (Ctrl+C)">
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE8C8;" Margin="0"/>
+            </Button>
+            <Button Style="{StaticResource CmdButton}" Click="Paste_Click" ToolTip="Paste (Ctrl+V)">
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE77F;" Margin="0"/>
+            </Button>
+            <Button Style="{StaticResource CmdButton}" Click="Rename_Click" ToolTip="Rename (F2)">
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE8AC;" Margin="0"/>
+            </Button>
+            <Button Style="{StaticResource CmdButton}" Click="Delete_Click" ToolTip="Delete (Del) — Shift+Del deletes permanently">
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE74D;" Margin="0"/>
+            </Button>
+            <Button Style="{StaticResource CmdButton}" Click="Terminal_Click" ToolTip="Open a terminal here">
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE756;" Margin="0"/>
+            </Button>
+
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE8CB;" Margin="12,0,6,0" ToolTip="Sort by"/>
+                <ComboBox x:Name="SortBox" Width="140" VerticalAlignment="Center" SelectionChanged="SortBox_SelectionChanged">
+                    <ComboBoxItem Content="Name" Tag="Name"/>
+                    <ComboBoxItem Content="Date modified" Tag="Date"/>
+                    <ComboBoxItem Content="Type" Tag="Type"/>
+                    <ComboBoxItem Content="Size" Tag="Size"/>
+                </ComboBox>
+                <Button x:Name="SortDirButton" Style="{StaticResource IconButton}" Content="&#xE74A;" ToolTip="Ascending / descending" Click="SortDir_Click"/>
+
+                <ToggleButton x:Name="GridToggle" Style="{StaticResource ViewToggle}" Content="&#xE80A;" Margin="12,0,1,0" ToolTip="Thumbnails" Click="GridToggle_Click"/>
+                <ToggleButton x:Name="DetailsToggle" Style="{StaticResource ViewToggle}" Content="&#xE8FD;" ToolTip="Details" Click="DetailsToggle_Click"/>
+
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE91B;" Margin="14,0,6,0" ToolTip="Thumbnail size (Ctrl+mouse wheel)"/>
+                <Slider x:Name="SizeSlider" Width="180" Minimum="32" Maximum="1600" VerticalAlignment="Center"
+                        SmallChange="16" LargeChange="64" IsMoveToPointEnabled="True"
+                        Value="{Binding ThumbSize, Mode=TwoWay}" ToolTip="Thumbnail size (Ctrl+mouse wheel)"/>
+                <TextBlock Text="{Binding ThumbSizeText}" Width="60" VerticalAlignment="Center" Margin="8,0,0,0"/>
+
+                <CheckBox x:Name="HiddenCheck" Content="Hidden" Margin="10,0,0,0" VerticalAlignment="Center" MinWidth="0"
+                          Checked="HiddenCheck_Changed" Unchecked="HiddenCheck_Changed"/>
+                <CheckBox x:Name="ExtCheck" Content="Extensions" Margin="4,0,0,0" VerticalAlignment="Center" MinWidth="0"
+                          Checked="ExtCheck_Changed" Unchecked="ExtCheck_Changed"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Main area -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="TreeColumn" Width="240" MinWidth="120"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TreeView x:Name="Tree" BorderThickness="0" Background="Transparent" Padding="4,0"
+                      SelectedItemChanged="Tree_SelectedItemChanged"
+                      PreviewMouseLeftButtonUp="Tree_PreviewMouseLeftButtonUp"/>
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="Transparent" ResizeBehavior="PreviousAndNext"/>
+
+            <Grid Grid.Column="2" Margin="0,0,4,0">
+                <ListBox x:Name="TileList" SelectionMode="Extended" BorderThickness="0" Background="Transparent"
+                         VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         TextSearch.TextPath="DisplayName" AllowDrop="True"
+                         ItemContainerStyle="{StaticResource TileItemStyle}"
+                         ItemTemplate="{StaticResource TileTemplate}">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <local:VirtualizingTilePanel ItemWidth="{Binding TileWidth}" ItemHeight="{Binding TileHeight}"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+
+                <ListView x:Name="DetailsList" SelectionMode="Extended" BorderThickness="0" Background="Transparent"
+                          Visibility="Collapsed" VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          TextSearch.TextPath="DisplayName" AllowDrop="True">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="380">
+                                <GridViewColumnHeader Content="Name" Tag="Name" Click="Header_Click" HorizontalContentAlignment="Left"/>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Opacity="{Binding ItemOpacity}" ToolTip="{Binding ToolTipText}" ToolTipService.InitialShowDelay="900">
+                                            <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,8,0"/>
+                                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Width="170" DisplayMemberBinding="{Binding ModifiedText}">
+                                <GridViewColumnHeader Content="Date modified" Tag="Date" Click="Header_Click" HorizontalContentAlignment="Left"/>
+                            </GridViewColumn>
+                            <GridViewColumn Width="170" DisplayMemberBinding="{Binding TypeName}">
+                                <GridViewColumnHeader Content="Type" Tag="Type" Click="Header_Click" HorizontalContentAlignment="Left"/>
+                            </GridViewColumn>
+                            <GridViewColumn Width="150">
+                                <GridViewColumnHeader Content="Size" Tag="Size" Click="Header_Click" HorizontalContentAlignment="Left"/>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding SizeText}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <TextBlock x:Name="EmptyText" Text="This folder is empty." HorizontalAlignment="Center" VerticalAlignment="Top"
+                           Margin="0,40,0,0" Opacity="0.6" IsHitTestVisible="False" Visibility="Collapsed"/>
+            </Grid>
+        </Grid>
+
+        <!-- Status bar -->
+        <DockPanel Grid.Row="3" Margin="12,4,12,6">
+            <TextBlock x:Name="StatusText" Opacity="0.8"/>
+        </DockPanel>
+    </Grid>
+</Window>
