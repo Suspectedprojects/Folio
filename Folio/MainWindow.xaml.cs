@@ -606,20 +606,28 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _ = Reload();
     }
 
+    /// <summary>Opens the batch Rename window for the selection (or the whole folder).</summary>
     async void RenameSelected()
     {
-        var item = Selected().FirstOrDefault();
-        if (item == null || item.IsDrive) return;
-        var name = InputDialog.Show(this, "Rename", "New name:", item.Name, selectStem: !item.IsFolder);
-        if (string.IsNullOrWhiteSpace(name) || name == item.Name) return;
-        if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        var selectedSet = new HashSet<FileItem>(ActiveList.SelectedItems.Cast<FileItem>());
+        var selected = _shown.Where(selectedSet.Contains).Where(i => !i.IsDrive).ToList(); // display order
+        List<FileItem>? folder = null;
+        if (InRealFolder)
         {
-            ShowError("A file name can't contain any of the following characters:\n\\ / : * ? \" < > |");
-            return;
+            folder = _items.ToList();
+            folder.Sort(Compare);
         }
-        var dest = Path.Combine(Path.GetDirectoryName(item.FullPath)!, name);
-        FileOps.Run(FO_RENAME, [item.FullPath], dest, FOF_ALLOWUNDO, Hwnd, background: false);
-        await Reload(selectPath: dest);
+        if (selected.Count == 0 && folder == null) return;
+
+        var w = new BatchRenameWindow(selected, folder) { Owner = this };
+        if (w.ShowDialog() != true) return;
+
+        await Reload();
+        var renamed = new HashSet<string>(w.RenamedPaths, PathCmp);
+        var list = ActiveList;
+        list.SelectedItems.Clear();
+        foreach (var it in _shown) if (renamed.Contains(it.FullPath)) list.SelectedItems.Add(it);
+        if (list.SelectedItems.Count > 0) list.ScrollIntoView(list.SelectedItems[0]);
     }
 
     async void NewFolder()

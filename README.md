@@ -21,6 +21,7 @@ Windows File Explorer tops out at "Extra large icons", which is 256 × 256 px, a
 - **Fast with huge folders.** Only the items on screen are created, thumbnails load in the background, newest requests first, and memory use is capped.
 - **Thumbnails and details views**, with natural sort by name, date, type or size.
 - **Join images.** Select two or more images, right-click and choose **Join images** to combine them into one seamless picture, side by side or stacked. There's no background canvas: images are scaled so their shared edges match and placed directly against each other. Drag an image to reorder it and it snaps into place. Saves at full resolution as PNG or JPEG, with an option to send the originals to the Recycle Bin. EXIF rotation is respected. You can also open it from the command line with `Folio.exe --join a.jpg b.jpg`.
+- **Batch rename.** Right-click → **Rename**, F2, or the toolbar opens a rename window for the selection, or for everything in the folder. Give items a new name with an optional running number, choosing the style (`Name (1)`, `Name 1`, `Name_1` and so on), the start number and zero-padding. Or randomize every name. Extensions are kept. A live preview flags clashes before anything changes, and renames happen in two passes, so swaps work and a failure part-way is rolled back.
 - **The real Windows right-click menu**, including Open with, Send to, Properties and add-ons like 7-Zip.
 - **Copy, cut, paste, rename, delete and new folder**, using Windows' own progress and conflict dialogs. Delete goes to the Recycle Bin, and Shift+Del deletes permanently. Copy/paste works with File Explorer in both directions.
 - **Drag and drop** to and from other apps.
@@ -36,7 +37,7 @@ Windows File Explorer tops out at "Extra large icons", which is 256 × 256 px, a
 | Alt+← / Alt+→ / Alt+↑ | Back / Forward / Up |
 | Backspace | Back |
 | Enter | Open |
-| F2 | Rename |
+| F2 | Rename (batch) |
 | Del / Shift+Del | Recycle / delete permanently |
 | Ctrl+C / Ctrl+X / Ctrl+V | Copy / cut / paste |
 | Ctrl+Shift+N | New folder |
@@ -81,4 +82,5 @@ The installer is built with [WiX Toolset](https://wixtoolset.org/), which is pul
 | `Folio/FileItem.cs` | Loads thumbnails lazily and keeps decoded images within a memory budget |
 | `Folio/MainWindow.xaml(.cs)` | The UI, navigation, search, clipboard and drag & drop |
 | `Folio/JoinWindow.xaml(.cs)` | Join images: the drag-to-reorder strip and full-resolution compositing |
+| `Folio/BatchRenameWindow.xaml(.cs)` | Batch rename: name and number or random names, live preview, two-pass rename with rollback |
 | `installer/` | The WiX project for the per-user `.msi` |

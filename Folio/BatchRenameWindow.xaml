@@ -1,0 +1,102 @@
+<Window x:Class="Folio.BatchRenameWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Rename - Folio" Icon="folio.ico"
+        Width="780" Height="680" MinWidth="600" MinHeight="500"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Grid Margin="20,14,20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="HeaderText" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+        <!-- What to rename -->
+        <WrapPanel Grid.Row="1" Margin="0,0,0,14">
+            <TextBlock Text="Rename" VerticalAlignment="Center" Margin="0,0,12,0" FontWeight="SemiBold"/>
+            <RadioButton x:Name="SelectedScope" GroupName="scope" VerticalAlignment="Center" Margin="0,0,16,0" IsChecked="True" Checked="Changed"/>
+            <RadioButton x:Name="FolderScope" GroupName="scope" VerticalAlignment="Center" Margin="0,0,16,0" Checked="Changed"/>
+            <CheckBox x:Name="IncludeFolders" Content="Include folders" VerticalAlignment="Center" Checked="Changed" Unchecked="Changed"/>
+        </WrapPanel>
+
+        <!-- Option 1: name + number -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <RadioButton x:Name="NameMode" GroupName="mode" Content="Give them a new name" IsChecked="True" FontWeight="SemiBold" Checked="Changed"/>
+            <StackPanel x:Name="NamePanel" Margin="30,8,0,0">
+                <TextBox x:Name="NameBox" TextChanged="Changed"/>
+                <WrapPanel Margin="0,10,0,0">
+                    <CheckBox x:Name="NumberCheck" Content="Add a number to each" IsChecked="True" VerticalAlignment="Center" Margin="0,0,18,0"
+                              Checked="Changed" Unchecked="Changed"/>
+                    <TextBlock Text="Style" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox x:Name="StyleBox" Width="130" SelectedIndex="0" VerticalAlignment="Center" Margin="0,0,18,0" SelectionChanged="Changed">
+                        <ComboBoxItem Content="Name (1)"/>
+                        <ComboBoxItem Content="Name 1"/>
+                        <ComboBoxItem Content="Name_1"/>
+                        <ComboBoxItem Content="Name-1"/>
+                        <ComboBoxItem Content="Name1"/>
+                    </ComboBox>
+                    <TextBlock Text="Start at" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox x:Name="StartBox" Text="1" Width="70" VerticalAlignment="Center" Margin="0,0,18,0" TextChanged="Changed"/>
+                    <TextBlock Text="Digits" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox x:Name="PadBox" Width="120" SelectedIndex="0" VerticalAlignment="Center" SelectionChanged="Changed">
+                        <ComboBoxItem Content="1, 2, 3"/>
+                        <ComboBoxItem Content="01, 02, 03"/>
+                        <ComboBoxItem Content="001, 002"/>
+                        <ComboBoxItem Content="0001, 0002"/>
+                    </ComboBox>
+                </WrapPanel>
+                <TextBlock Text="Numbers follow the order the items are sorted in Folio. File extensions are kept."
+                           Opacity="0.6" Margin="0,8,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Option 2: random -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,12">
+            <RadioButton x:Name="RandomMode" GroupName="mode" Content="Randomize the names" FontWeight="SemiBold" Checked="Changed"/>
+            <WrapPanel x:Name="RandomPanel" Margin="30,8,0,0">
+                <TextBlock Text="Each item gets a unique random 12-character name. File extensions are kept."
+                           Opacity="0.6" VerticalAlignment="Center" Margin="0,0,14,0" TextWrapping="Wrap"/>
+                <Button Content="Shuffle again" Padding="10,4" Click="Shuffle_Click"/>
+            </WrapPanel>
+        </StackPanel>
+
+        <!-- Preview -->
+        <DockPanel Grid.Row="4">
+            <TextBlock DockPanel.Dock="Top" Text="Preview" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <ListView x:Name="PreviewList" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Current name" Width="250" DisplayMemberBinding="{Binding Old}"/>
+                        <GridViewColumn Header="New name" Width="250">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding New}" FontWeight="{Binding Weight}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="" Width="200">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Status}" Foreground="{Binding StatusBrush}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DockPanel>
+
+        <!-- Buttons -->
+        <DockPanel Grid.Row="5" Margin="0,14,0,0" LastChildFill="False">
+            <TextBlock x:Name="SummaryText" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="440"/>
+            <Button DockPanel.Dock="Right" Content="Cancel" IsCancel="True" MinWidth="96" Margin="8,0,0,0"/>
+            <Button x:Name="RenameButton" DockPanel.Dock="Right" Content="Rename" IsDefault="True" MinWidth="96"
+                    Click="Rename_Click" Style="{DynamicResource AccentButtonStyle}"/>
+        </DockPanel>
+    </Grid>
+</Window>
