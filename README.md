@@ -20,6 +20,7 @@ Windows File Explorer tops out at "Extra large icons", which is 256 × 256 px, a
 - **The same thumbnails as Explorer.** Folio asks Windows for them, so photos, videos, PDFs, documents and folder previews all work.
 - **Fast with huge folders.** Only the items on screen are created, thumbnails load in the background, newest requests first, and memory use is capped.
 - **Thumbnails and details views**, with natural sort by name, date, type or size.
+- **Join images.** Select two or more images, right-click and choose **Join images** to combine them into one seamless picture, side by side or stacked. There's no background canvas: images are scaled so their shared edges match and placed directly against each other. Drag an image to reorder it and it snaps into place. Saves at full resolution as PNG or JPEG, with an option to send the originals to the Recycle Bin. EXIF rotation is respected. You can also open it from the command line with `Folio.exe --join a.jpg b.jpg`.
 - **The real Windows right-click menu**, including Open with, Send to, Properties and add-ons like 7-Zip.
 - **Copy, cut, paste, rename, delete and new folder**, using Windows' own progress and conflict dialogs. Delete goes to the Recycle Bin, and Shift+Del deletes permanently. Copy/paste works with File Explorer in both directions.
 - **Drag and drop** to and from other apps.
@@ -79,4 +80,5 @@ The installer is built with [WiX Toolset](https://wixtoolset.org/), which is pul
 | `Folio/ThumbnailLoader.cs` | Background STA worker threads that load thumbnails, last-in first-out |
 | `Folio/FileItem.cs` | Loads thumbnails lazily and keeps decoded images within a memory budget |
 | `Folio/MainWindow.xaml(.cs)` | The UI, navigation, search, clipboard and drag & drop |
+| `Folio/JoinWindow.xaml(.cs)` | Join images: the drag-to-reorder strip and full-resolution compositing |
 | `installer/` | The WiX project for the per-user `.msi` |

@@ -66,7 +66,8 @@ internal static class ShellImages
 /// <summary>Shows the real Explorer right-click menu (Open with, Send to, 7-Zip, Properties...).</summary>
 internal static class ShellContextMenu
 {
-    const uint CmdFirst = 1, CmdLast = 0x7FFF;
+    const uint CmdFirst = 1, CmdLast = 0x6FFF, ExtraFirst = 0x7000;
+    const uint MF_BYPOSITION = 0x400, MF_STRING = 0x0, MF_SEPARATOR = 0x800;
     const uint CMF_NORMAL = 0, CMF_EXPLORE = 0x4, CMF_CANRENAME = 0x10, CMF_EXTENDEDVERBS = 0x100;
     const uint TPM_RIGHTBUTTON = 0x2, TPM_RETURNCMD = 0x100;
     const uint CMIC_MASK_UNICODE = 0x4000, CMIC_MASK_SHIFT_DOWN = 0x10000000, CMIC_MASK_PTINVOKE = 0x20000000;
@@ -91,7 +92,17 @@ internal static class ShellContextMenu
     }
 
     /// <param name="intercept">Return true to handle a verb yourself instead of the shell.</param>
-    public static void Show(IntPtr hwnd, IReadOnlyList<string> paths, bool extended, Func<string, bool> intercept)
+    /// <param name="extra">Folio's own commands, shown at the top of the menu.</param>
+    public static void Show(IntPtr hwnd, IReadOnlyList<string> paths, bool extended, Func<string, bool> intercept,
+        IReadOnlyList<(string Text, Action Run)>? extra = null)
+    {
+        Action? pick = null;
+        ShowCore(hwnd, paths, extended, intercept, extra, a => pick = a);
+        pick?.Invoke(); // run after the menu and its COM objects are gone
+    }
+
+    static void ShowCore(IntPtr hwnd, IReadOnlyList<string> paths, bool extended, Func<string, bool> intercept,
+        IReadOnlyList<(string Text, Action Run)>? extra, Action<Action> picked)
     {
         var pidls = new List<IntPtr>();
         IntPtr hMenu = IntPtr.Zero;
@@ -118,9 +129,20 @@ internal static class ShellContextMenu
 
             hMenu = CreatePopupMenu();
             cm.QueryContextMenu(hMenu, 0, CmdFirst, CmdLast, CMF_NORMAL | CMF_EXPLORE | CMF_CANRENAME | (extended ? CMF_EXTENDEDVERBS : 0));
+            if (extra is { Count: > 0 })
+            {
+                InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, UIntPtr.Zero, null);
+                for (int i = extra.Count - 1; i >= 0; i--)
+                    InsertMenu(hMenu, 0, MF_BYPOSITION | MF_STRING, (UIntPtr)(ExtraFirst + (uint)i), extra[i].Text);
+            }
             GetCursorPos(out var pt);
             uint cmd = TrackPopupMenuEx(hMenu, TPM_RETURNCMD | TPM_RIGHTBUTTON, pt.X, pt.Y, hwnd, IntPtr.Zero);
-            if (cmd < CmdFirst) return;
+            if (extra != null && cmd >= ExtraFirst && cmd < ExtraFirst + extra.Count)
+            {
+                picked(extra[(int)(cmd - ExtraFirst)].Run);
+                return;
+            }
+            if (cmd < CmdFirst || cmd > CmdLast) return;
 
             uint id = cmd - CmdFirst;
             if (intercept(GetVerb(cm, id))) return;

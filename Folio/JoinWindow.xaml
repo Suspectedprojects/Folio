@@ -1,0 +1,57 @@
+<Window x:Class="Folio.JoinWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Join images - Folio" Icon="folio.ico"
+        Width="1100" Height="760" MinWidth="680" MinHeight="440"
+        WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+        <Style x:Key="Glyph" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,7,0"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Arrangement options -->
+        <WrapPanel x:Name="Toolbar" Grid.Row="0" Margin="12,10,12,6" VerticalAlignment="Center">
+            <Button x:Name="SideBySideButton" Click="SideBySide_Click" Margin="0,0,6,0" Padding="10,5" ToolTip="Put the images in a row">
+                <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Glyph}" Text="&#xE8A9;"/><TextBlock Text="Side by side"/></StackPanel>
+            </Button>
+            <Button x:Name="StackedButton" Click="Stacked_Click" Margin="0,0,6,0" Padding="10,5" ToolTip="Put the images in a column">
+                <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Glyph}" Text="&#xE8C0;"/><TextBlock Text="Stacked"/></StackPanel>
+            </Button>
+            <Button Click="Reverse_Click" Margin="0,0,14,0" Padding="10,5" ToolTip="Reverse the order">
+                <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Glyph}" Text="&#xE8AB;"/><TextBlock Text="Reverse"/></StackPanel>
+            </Button>
+            <TextBlock Text="Drag an image to move it. The others make room, and it snaps into place when you let go."
+                       VerticalAlignment="Center" Margin="4,0,0,0" Opacity="0.65" TextWrapping="Wrap"/>
+        </WrapPanel>
+
+        <!-- Arrangement area -->
+        <Border Grid.Row="1" Margin="12,4,12,4" CornerRadius="6" ClipToBounds="True"
+                Background="{DynamicResource ControlFillColorTertiaryBrush}">
+            <Grid x:Name="Stage">
+                <Canvas x:Name="Board"/>
+                <TextBlock x:Name="BusyText" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Opacity="0.7"/>
+            </Grid>
+        </Border>
+
+        <!-- Save bar -->
+        <DockPanel Grid.Row="2" Margin="12,6,12,12" LastChildFill="False">
+            <TextBlock x:Name="SizeText" VerticalAlignment="Center" Opacity="0.8"/>
+            <Button DockPanel.Dock="Right" Content="Cancel" IsCancel="True" MinWidth="96" Margin="8,0,0,0"/>
+            <Button x:Name="SaveButton" DockPanel.Dock="Right" Content="Save…" IsDefault="True" MinWidth="96" Click="Save_Click"
+                    Style="{DynamicResource AccentButtonStyle}"/>
+            <CheckBox x:Name="DeleteCheck" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="0,0,18,0"
+                      Content="Delete originals" ToolTip="After saving, move the original images to the Recycle Bin"/>
+        </DockPanel>
+    </Grid>
+</Window>

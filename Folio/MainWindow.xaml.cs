@@ -699,7 +699,19 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             ? sel.Select(i => i.FullPath).ToList()
             : [item.FullPath];
         bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
-        ShellContextMenu.Show(Hwnd, paths, shift, verb => HandleShellVerb(verb, sel));
+
+        var extra = new List<(string, Action)>();
+        var images = _shown.Where(i => sel.Contains(i) && !i.IsFolder && JoinWindow.IsImage(i.FullPath)).Select(i => i.FullPath).ToList();
+        if (images.Count >= 2 && images.Count == sel.Count) extra.Add(("Join images", () => OpenJoin(images)));
+
+        ShellContextMenu.Show(Hwnd, paths, shift, verb => HandleShellVerb(verb, sel), extra);
+    }
+
+    async void OpenJoin(List<string> images)
+    {
+        var w = new JoinWindow(images) { Owner = this };
+        if (w.ShowDialog() == true && w.SavedPath is { } saved && PathEq(Path.GetDirectoryName(saved), _current))
+            await Reload(selectPath: saved);
     }
 
     bool HandleShellVerb(string verb, List<FileItem> sel)
